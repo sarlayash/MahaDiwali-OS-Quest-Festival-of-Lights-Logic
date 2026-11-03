@@ -235,13 +235,21 @@ document.addEventListener('DOMContentLoaded', () => {
       badgeShowcase.innerHTML = `
         <div class="new-badge-alert">
           <span class="badge-icon-huge">${badge.icon}</span>
-          <div>
+          <div style="flex: 1;">
             <h4>Honour Awarded: ${badge.name}</h4>
             <p>${badge.title}</p>
             <small>${badge.desc}</small>
           </div>
+          <button class="btn btn-warning btn-sm" id="vic-dl-badge-btn" style="white-space: nowrap;">💾 Download Badge (PNG)</button>
         </div>
       `;
+      const dlBadgeBtn = badgeShowcase.querySelector('#vic-dl-badge-btn');
+      if (dlBadgeBtn) {
+        dlBadgeBtn.addEventListener('click', () => {
+          soundEngine.playBell(1000);
+          certificateGenerator.downloadBadgePNG(badge, gameState.player.name);
+        });
+      }
     } else {
       badgeShowcase.innerHTML = '';
     }
@@ -323,7 +331,8 @@ document.addEventListener('DOMContentLoaded', () => {
     certificateGenerator.downloadCertificate(gameState.player, gameState.allBadges);
   });
 
-  document.getElementById('btn-print-cert').addEventListener('click', () => {
+  const btnPrintCert = document.getElementById('btn-print-cert');
+  if (btnPrintCert) btnPrintCert.addEventListener('click', () => {
     soundEngine.playClick();
     window.print();
   });
@@ -355,7 +364,20 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="b-title">${b.title}</span>
           <p class="b-desc">${b.desc}</p>
         </div>
+        ${isEarned ? `<button class="btn btn-warning btn-sm btn-download-badge" data-badge-id="${b.id}">💾 Download Badge (PNG)</button>` : ''}
       `;
+
+      if (isEarned) {
+        const dlBtn = item.querySelector('.btn-download-badge');
+        if (dlBtn) {
+          dlBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            soundEngine.playBell(1000);
+            certificateGenerator.downloadBadgePNG(b, gameState.player.name);
+          });
+        }
+      }
+
       list.appendChild(item);
     });
   }

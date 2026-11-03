@@ -1,7 +1,8 @@
 /**
- * Diwali OS Quest - Grand Royal Black & Gold Certificate Generator
- * Canvas-based ultra high-res (2400x1600) obsidian & metallic gold certificate.
- * Includes Diya motifs, Sanskrit shloka, learner's name, badges grid, and verification ID.
+ * Diwali OS Quest - Grand Festive Certificate & Badge PNG Generator
+ * White Background Edition with Colorful Indian Festive Vibes.
+ * Verified: NO fake signatories — only "Powered By Kapil" and 5 Diyas at bottom.
+ * Pure PNG downloads for Certificates and Badges.
  */
 class CertificateGenerator {
   constructor() {
@@ -16,28 +17,28 @@ class CertificateGenerator {
     const w = this.canvas.width;
     const h = this.canvas.height;
 
-    // Background gradient: Deep Imperial Obsidian Black with subtle golden radial warmth
-    const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 150, w / 2, h / 2, 1300);
-    bgGrad.addColorStop(0, '#16161D');
-    bgGrad.addColorStop(0.5, '#0E0E12');
-    bgGrad.addColorStop(1, '#060608');
+    // Background: Pristine Ivory White with subtle warm festive vignette
+    const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 200, w / 2, h / 2, 1400);
+    bgGrad.addColorStop(0, '#FFFFFF');
+    bgGrad.addColorStop(0.6, '#FFFDF8');
+    bgGrad.addColorStop(1, '#FFF5EA');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // Ornate Metallic 24K Golden Borders
-    ctx.lineWidth = 18;
-    ctx.strokeStyle = '#D4AF37'; // 24K Metallic Gold
+    // Ornate Dual Festive Borders (Gold & Rani Pink / Saffron)
+    ctx.lineWidth = 16;
+    ctx.strokeStyle = '#D4AF37'; // 24K Gold
     ctx.strokeRect(60, 60, w - 120, h - 120);
 
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#E91E63'; // Rani Pink
     ctx.strokeRect(88, 88, w - 176, h - 176);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#8C6D23';
+    ctx.strokeStyle = '#FF9800'; // Marigold Saffron
     ctx.strokeRect(104, 104, w - 208, h - 208);
 
-    // Ornate corner flourishes
+    // Corner Ornaments
     this.drawCorner(ctx, 104, 104, 1, 1);
     this.drawCorner(ctx, w - 104, 104, -1, 1);
     this.drawCorner(ctx, 104, h - 104, 1, -1);
@@ -46,53 +47,50 @@ class CertificateGenerator {
     // Header Emblem
     ctx.textAlign = 'center';
     
-    // Top auspicious Sanskrit quote
+    // Top Sanskrit invocation
     ctx.font = 'italic 26px "Times New Roman", Georgia, serif';
-    ctx.fillStyle = '#D4AF37';
+    ctx.fillStyle = '#BF360C';
     ctx.fillText('॥ तमसो मा ज्योतिर्गमय — From Darkness into Light, From Stagnation into Concurrency ॥', w / 2, 165);
 
-    // Top Emblem Diya Icon
+    // Auspicious Header Emblems
     ctx.font = '68px serif';
     ctx.fillText('🪔 ✨ 👑 ✨ 🪔', w / 2, 245);
 
     // Main Certificate Title
     ctx.font = 'bold 54px "Cinzel", "Times New Roman", serif';
-    ctx.fillStyle = '#FFD700'; // Radiant Gold
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = 'rgba(255, 215, 0, 0.4)';
+    ctx.fillStyle = '#C2185B'; // Rani Pink
     ctx.fillText('MAHADIWALI OPERATING SYSTEMS QUEST', w / 2, 325);
-    ctx.shadowBlur = 0;
 
     ctx.font = 'bold 36px "Times New Roman", serif';
-    ctx.fillStyle = '#D4AF37';
+    ctx.fillStyle = '#E65100'; // Deep Saffron
     ctx.fillText('CERTIFICATE OF DISTINCTION & MASTERY', w / 2, 380);
 
-    // Subtitle
+    // Ribbon / Subtitle
     ctx.font = '28px Georgia, serif';
-    ctx.fillStyle = '#C8B898';
-    ctx.fillText('This royal credential is conferred with highest honour upon', w / 2, 450);
+    ctx.fillStyle = '#4A5568';
+    ctx.fillText('This royal credential is proudly presented to commemorate that', w / 2, 450);
 
-    // Learner's Name (regal, prominent in radiant 24k gold)
+    // Learner's Name (regal, prominent in crimson & gold)
     ctx.font = 'bold 74px "Playfair Display", "Georgia", cursive, serif';
-    ctx.fillStyle = '#FFD700';
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = 'rgba(255, 215, 0, 0.6)';
+    ctx.fillStyle = '#B71C1C';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(233, 30, 99, 0.25)';
     ctx.fillText(player.name.toUpperCase(), w / 2, 545);
     ctx.shadowBlur = 0;
 
-    // Underline flourish for name
+    // Underline flourish
     ctx.beginPath();
     ctx.moveTo(w / 2 - 420, 565);
     ctx.lineTo(w / 2 + 420, 565);
     ctx.lineWidth = 4;
-    ctx.strokeStyle = '#D4AF37';
+    ctx.strokeStyle = '#FFB300';
     ctx.stroke();
 
     // Achievement Description
-    ctx.font = '29px Georgia, serif';
-    ctx.fillStyle = '#E6DAC3';
+    ctx.font = '28px Georgia, serif';
+    ctx.fillStyle = '#2D3748';
     const lines = [
-      'for successfully illuminating all 7 Sacred Akhand Diyas of the Grand Palace Core and demonstrating mastery over',
+      'has illuminated all 7 Sacred Akhand Diyas of the Grand Palace Core and demonstrated supreme mastery over',
       'Processes & Threads, CPU Scheduling (FCFS/SJF/RR), Concurrency Synchronization & Mutexes,',
       'Deadlock Avoidance (Banker\'s Algorithm), Memory Partitioning & Compaction, Virtual Paging (LRU/TLB),',
       'and High-Performance Inode-Structured File Systems during the auspicious festival of Deepavali.'
@@ -103,7 +101,7 @@ class CertificateGenerator {
 
     // Badges Showcase Banner
     ctx.font = 'bold 30px "Times New Roman", serif';
-    ctx.fillStyle = '#FFD700';
+    ctx.fillStyle = '#C2185B';
     ctx.fillText('✦ ✦ ✦   HONORARY FESTIVE BADGES CONFERRED   ✦ ✦ ✦', w / 2, 850);
 
     // Draw 8 Badges horizontally
@@ -117,10 +115,10 @@ class CertificateGenerator {
       // Badge ring
       ctx.beginPath();
       ctx.arc(bx, badgeY, 48, 0, Math.PI * 2);
-      ctx.fillStyle = '#181820';
+      ctx.fillStyle = '#FFF8E1';
       ctx.fill();
       ctx.lineWidth = 4;
-      ctx.strokeStyle = '#D4AF37';
+      ctx.strokeStyle = '#FFB300';
       ctx.stroke();
 
       // Badge emoji
@@ -129,68 +127,73 @@ class CertificateGenerator {
 
       // Badge label
       ctx.font = 'bold 18px "Times New Roman", serif';
-      ctx.fillStyle = '#FFD700';
+      ctx.fillStyle = '#C2185B';
       const shortName = b.name.split(' ')[0] + ' ' + (b.name.split(' ')[1] || '');
       ctx.fillText(shortName, bx, badgeY + 80);
     });
 
-    // Verification ID, Date & XP Block
+    // Verification ID, Date & XP Block (Left footer)
     const footerY = 1260;
     ctx.textAlign = 'left';
     ctx.font = '22px monospace';
-    ctx.fillStyle = '#C8B898';
+    ctx.fillStyle = '#4A5568';
     ctx.fillText(`Credential ID: ${player.certId}`, 180, footerY);
     ctx.fillText(`Date of Conferrer: ${player.completionDate || new Date().toDateString()}`, 180, footerY + 36);
     ctx.fillText(`Mastery Score: ${player.xp} XP (Grade A+ Outstanding)`, 180, footerY + 72);
 
-    // Official Gold Seal / Stamp
+    // Official Stamp / Seal (Center)
     const sealX = w / 2;
     const sealY = footerY + 35;
     ctx.save();
     ctx.beginPath();
-    ctx.arc(sealX, sealY, 95, 0, Math.PI * 2);
-    ctx.fillStyle = '#D4AF37';
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = 'rgba(212,175,55,0.7)';
+    ctx.arc(sealX, sealY, 90, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFF8E1';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = 'rgba(255, 179, 0, 0.4)';
     ctx.fill();
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#D4AF37';
     ctx.stroke();
 
-    ctx.fillStyle = '#0A0A0C';
+    ctx.fillStyle = '#C2185B';
     ctx.textAlign = 'center';
-    ctx.font = 'bold 22px "Times New Roman", serif';
-    ctx.fillText('★ OFFICIAL SEAL ★', sealX, sealY - 40);
+    ctx.font = 'bold 20px "Times New Roman", serif';
+    ctx.fillText('★ OFFICIAL SEAL ★', sealX, sealY - 36);
     ctx.font = '40px serif';
     ctx.fillText('🪔', sealX, sealY);
     ctx.font = 'bold 18px "Times New Roman", serif';
     ctx.fillText('MAHADIWALI OS', sealX, sealY + 35);
-    ctx.fillText('AUTHENTICATED', sealX, sealY + 58);
+    ctx.fillText('AUTHENTICATED', sealX, sealY + 56);
     ctx.restore();
 
-    // Signatures
+    // Right Footer: ONLY "Powered By Kapil" (No fake signatories!)
     ctx.textAlign = 'right';
-    ctx.font = 'italic bold 28px "Brush Script MT", "Playfair Display", cursive, serif';
-    ctx.fillStyle = '#FFD700';
-    ctx.fillText('Grand OS Architect', w - 180, footerY + 10);
+    ctx.font = 'bold 36px "Cinzel", "Georgia", serif';
+    ctx.fillStyle = '#C2185B';
+    ctx.fillText('Powered By Kapil', w - 180, footerY + 35);
+
     ctx.beginPath();
-    ctx.moveTo(w - 380, footerY + 25);
-    ctx.lineTo(w - 180, footerY + 25);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#D4AF37';
+    ctx.moveTo(w - 480, footerY + 48);
+    ctx.lineTo(w - 180, footerY + 48);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#FFB300';
     ctx.stroke();
 
     ctx.font = '20px Georgia, serif';
-    ctx.fillStyle = '#C8B898';
-    ctx.fillText('Chair of Concurrency & Systems', w - 180, footerY + 55);
-    ctx.fillText('Royal Deepavali Council of Ayodhya Core', w - 180, footerY + 80);
+    ctx.fillStyle = '#718096';
+    ctx.fillText('Diwali Operating Systems Mahotsav', w - 180, footerY + 76);
+
+    // EXACT 5 DIYAS AT THE VERY BOTTOM OF THE CERTIFICATE
+    ctx.textAlign = 'center';
+    ctx.font = '52px serif';
+    ctx.fillText('🪔   🪔   🪔   🪔   🪔', w / 2, h - 90);
 
     return this.canvas.toDataURL('image/png');
   }
 
   drawCorner(ctx, x, y, dx, dy) {
     ctx.save();
-    ctx.strokeStyle = '#FFD700';
+    ctx.strokeStyle = '#E91E63';
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(x, y + dy * 60);
@@ -198,10 +201,10 @@ class CertificateGenerator {
     ctx.lineTo(x + dx * 60, y);
     ctx.stroke();
 
-    // Decorative golden jewel at corner
+    // Small decorative golden flower at corner
     ctx.beginPath();
     ctx.arc(x + dx * 20, y + dy * 20, 8, 0, Math.PI * 2);
-    ctx.fillStyle = '#D4AF37';
+    ctx.fillStyle = '#FFB300';
     ctx.fill();
     ctx.restore();
   }
@@ -210,6 +213,92 @@ class CertificateGenerator {
     const dataUrl = this.generate(player, badges);
     const link = document.createElement('a');
     link.download = `Diwali_OS_Mastery_Certificate_${player.name.replace(/\s+/g, '_')}.png`;
+    link.href = dataUrl;
+    link.click();
+  }
+
+  // Generate an individual high-res PNG Badge card for learners
+  downloadBadgePNG(badge, playerName) {
+    const badgeCanvas = document.createElement('canvas');
+    badgeCanvas.width = 1000;
+    badgeCanvas.height = 1000;
+    const bCtx = badgeCanvas.getContext('2d');
+
+    // White background with festive radial warmth
+    const grad = bCtx.createRadialGradient(500, 500, 100, 500, 500, 600);
+    grad.addColorStop(0, '#FFFFFF');
+    grad.addColorStop(0.8, '#FFFDF8');
+    grad.addColorStop(1, '#FFF5EA');
+    bCtx.fillStyle = grad;
+    bCtx.fillRect(0, 0, 1000, 1000);
+
+    // Dual Festive Borders
+    bCtx.lineWidth = 14;
+    bCtx.strokeStyle = '#D4AF37'; // 24K Gold
+    bCtx.strokeRect(40, 40, 920, 920);
+
+    bCtx.lineWidth = 4;
+    bCtx.strokeStyle = '#E91E63'; // Rani Pink
+    bCtx.strokeRect(62, 62, 876, 876);
+
+    // Header Tag
+    bCtx.textAlign = 'center';
+    bCtx.font = 'bold 26px "Cinzel", serif';
+    bCtx.fillStyle = '#C2185B';
+    bCtx.fillText('MAHADIWALI OS QUEST • OFFICIAL BADGE', 500, 120);
+
+    // Badge Icon Circle (Vibrant Gold)
+    bCtx.beginPath();
+    bCtx.arc(500, 310, 140, 0, Math.PI * 2);
+    bCtx.fillStyle = '#FFF8E1';
+    bCtx.shadowBlur = 20;
+    bCtx.shadowColor = 'rgba(255, 179, 0, 0.4)';
+    bCtx.fill();
+    bCtx.lineWidth = 6;
+    bCtx.strokeStyle = '#FFB300';
+    bCtx.stroke();
+    bCtx.shadowBlur = 0;
+
+    // Badge Emoji
+    bCtx.font = '130px serif';
+    bCtx.fillText(badge.icon, 500, 355);
+
+    // Badge Name
+    bCtx.font = 'bold 44px "Cinzel", "Times New Roman", serif';
+    bCtx.fillStyle = '#B71C1C';
+    bCtx.fillText(badge.name, 500, 520);
+
+    // Badge Title
+    bCtx.font = 'bold 26px Georgia, serif';
+    bCtx.fillStyle = '#E65100';
+    bCtx.fillText(badge.title, 500, 570);
+
+    // Awarded To
+    bCtx.font = '24px Georgia, serif';
+    bCtx.fillStyle = '#4A5568';
+    bCtx.fillText('Proudly Awarded To', 500, 640);
+
+    bCtx.font = 'bold 40px "Playfair Display", serif';
+    bCtx.fillStyle = '#C2185B';
+    bCtx.fillText((playerName || 'Scholar').toUpperCase(), 500, 695);
+
+    // Description text
+    bCtx.font = '20px Georgia, serif';
+    bCtx.fillStyle = '#718096';
+    bCtx.fillText(badge.desc, 500, 755);
+
+    // Footer: ONLY "Powered By Kapil"
+    bCtx.font = 'bold 30px "Cinzel", serif';
+    bCtx.fillStyle = '#C2185B';
+    bCtx.fillText('Powered By Kapil', 500, 845);
+
+    // EXACT 5 DIYAS AT THE BOTTOM OF THE BADGE
+    bCtx.font = '38px serif';
+    bCtx.fillText('🪔   🪔   🪔   🪔   🪔', 500, 915);
+
+    const dataUrl = badgeCanvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `Diwali_OS_Badge_${badge.id}_${(playerName || 'Scholar').replace(/\s+/g, '_')}.png`;
     link.href = dataUrl;
     link.click();
   }
