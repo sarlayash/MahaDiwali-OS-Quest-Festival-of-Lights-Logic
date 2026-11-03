@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnMute = document.getElementById('btn-sound-toggle');
   const btnMusic = document.getElementById('btn-music-toggle');
   const btnInstall = document.getElementById('btn-install-app');
+  const btnHeaderLogoff = document.getElementById('btn-header-logoff');
+  const btnLogoff = document.getElementById('btn-logoff');
+  const btnResetProgress = document.getElementById('btn-reset-progress');
   const installBanner = document.getElementById('install-banner');
 
   // State elements
@@ -137,6 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
     screen.classList.add('active');
     screen.style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (btnHeaderLogoff) {
+      if (screen === screenLanding || !gameState.player.name) {
+        btnHeaderLogoff.style.display = 'none';
+      } else {
+        btnHeaderLogoff.style.display = 'inline-flex';
+      }
+    }
   }
 
   // Render Royal Deepavali Map
@@ -380,6 +391,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
       list.appendChild(item);
     });
+  }
+
+  
+  // ==========================================
+  // Log Off & Reset Progress Handlers
+  // ==========================================
+  function performLogoff() {
+    soundEngine.playBell(700);
+    showScreen(screenLanding);
+    if (btnHeaderLogoff) btnHeaderLogoff.style.display = 'none';
+  }
+
+  function performResetProgress() {
+    const confirmed = confirm(
+      "⚠️ DANGER: Are you sure you want to completely RESET all your progress?\n\n" +
+      "This will permanently erase all lit Diyas, all 8 badges, XP points, and your certificate!\n\n" +
+      "Click OK to reset, or Cancel to keep your progress."
+    );
+    if (!confirmed) return;
+
+    soundEngine.playError();
+    gameState.resetProgress();
+    inputPlayerName.value = '';
+    avatarButtons.forEach(b => b.classList.remove('selected'));
+    const defaultAv = document.querySelector('.avatar-option[data-avatar="🪔"]');
+    if (defaultAv) defaultAv.classList.add('selected');
+    selectedAvatar = '🪔';
+
+    showScreen(screenLanding);
+    if (btnHeaderLogoff) btnHeaderLogoff.style.display = 'none';
+    alert("✨ Progress has been completely reset to zero! Enter your name to begin a fresh journey.");
+  }
+
+  if (btnLogoff) {
+    btnLogoff.addEventListener('click', () => {
+      const ok = confirm(`Log off ${gameState.player.name}? Your completed levels and badges will remain saved.`);
+      if (ok) performLogoff();
+    });
+  }
+
+  if (btnHeaderLogoff) {
+    btnHeaderLogoff.addEventListener('click', () => {
+      const ok = confirm(`Log off ${gameState.player.name}? Your completed levels and badges will remain saved.`);
+      if (ok) performLogoff();
+    });
+  }
+
+  if (btnResetProgress) {
+    btnResetProgress.addEventListener('click', performResetProgress);
   }
 
   // Close modals on backdrop click
