@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+verify.py
+check_js.py
+create_icons.py
+.DS_Store
+Thumbs.db
