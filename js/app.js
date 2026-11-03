@@ -185,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const certBtn = document.getElementById('btn-open-certificate');
     if (gameState.player.hasMasteredAll || gameState.player.completedLevels.length === 7) {
       certBtn.classList.remove('disabled');
+      certBtn.disabled = false;
       certBtn.innerHTML = '👑 Claim Grand Royal OS Certificate!';
     } else {
       certBtn.innerHTML = `📜 View Certificate (${gameState.player.completedLevels.length}/7 Diyas Lit)`;
@@ -197,9 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!levelData) return;
 
     showScreen(screenLevel);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Populate level shell
-    document.getElementById('level-breadcrumb-title').innerText = levelData.title;
+    document.getElementById('level-breadcrumb-title').innerText = `${levelData.diyaName} • ${levelData.title}`;
     document.getElementById('level-story-text').innerText = levelData.story;
     
     // Concepts checklist
@@ -244,32 +246,46 @@ document.addEventListener('DOMContentLoaded', () => {
       badgeShowcase.innerHTML = '';
     }
 
-    const nextBtn = document.getElementById('vic-btn-next');
-    if (isGrandVictory) {
-      nextBtn.innerText = '👑 Claim Grand Royal Certificate!';
-      nextBtn.onclick = () => {
+    const nextBtn = document.getElementById('vic-btn-next') || document.getElementById('btn-vic-next');
+    const mapBtn = document.getElementById('vic-btn-map') || document.getElementById('btn-vic-map');
+    const closeVicBtn = document.getElementById('btn-close-victory');
+
+    if (mapBtn) {
+      mapBtn.onclick = () => {
+        soundEngine.playClick();
         modalVictory.style.display = 'none';
-        openCertificateScreen();
-      };
-    } else {
-      nextBtn.innerText = 'Continue to Next Realm ➔';
-      nextBtn.onclick = () => {
-        modalVictory.style.display = 'none';
-        if (levelData.id < 7) {
-          launchLevel(levelData.id + 1);
-        } else {
-          showScreen(screenMap);
-          renderMap();
-        }
+        showScreen(screenMap);
+        renderMap();
       };
     }
-  }
 
-  document.getElementById('vic-btn-map').addEventListener('click', () => {
-    modalVictory.style.display = 'none';
-    showScreen(screenMap);
-    renderMap();
-  });
+    if (closeVicBtn) {
+      closeVicBtn.onclick = () => {
+        soundEngine.playClick();
+        modalVictory.style.display = 'none';
+        showScreen(screenMap);
+        renderMap();
+      };
+    }
+
+    if (nextBtn) {
+      if (isGrandVictory || levelData.id >= 7) {
+        nextBtn.innerText = '👑 Claim Grand Royal Certificate!';
+        nextBtn.onclick = () => {
+          soundEngine.playClick();
+          modalVictory.style.display = 'none';
+          openCertificateScreen();
+        };
+      } else {
+        nextBtn.innerText = 'Next Realm ➔';
+        nextBtn.onclick = () => {
+          soundEngine.playClick();
+          modalVictory.style.display = 'none';
+          launchLevel(levelData.id + 1);
+        };
+      }
+    }
+  }
 
   // Level back to map button
   document.getElementById('btn-level-back-map').addEventListener('click', () => {
@@ -281,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Certificate Screen View
   function openCertificateScreen() {
     showScreen(screenCert);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     particles.celebrateGrandVictory();
     soundEngine.playSuccess();
     soundEngine.playRocketLaunch();
@@ -346,6 +363,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Close modals on backdrop click
   window.addEventListener('click', (e) => {
     if (e.target === modalBadges) modalBadges.style.display = 'none';
-    if (e.target === modalVictory) modalVictory.style.display = 'none';
+    if (e.target === modalVictory) {
+      modalVictory.style.display = 'none';
+      showScreen(screenMap);
+      renderMap();
+    }
+  });
+
+  // Escape key closes modals
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (modalVictory.style.display === 'flex') {
+        modalVictory.style.display = 'none';
+        showScreen(screenMap);
+        renderMap();
+      }
+      if (modalBadges.style.display === 'flex') {
+        modalBadges.style.display = 'none';
+      }
+    }
   });
 });
