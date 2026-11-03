@@ -1,6 +1,6 @@
 /**
- * Diwali OS Quest - Complete Level Definitions and Interactive Mini-Games
- * Covers all 7 core OS modules in rich Diwali festival themes.
+ * Diwali OS Quest - Level Definitions and Interactive Mini-Games
+ * Black & Gold Royal Edition with Auto-Complete on 2 Failures and Guru Guidance.
  */
 
 const OS_LEVELS = [
@@ -29,7 +29,7 @@ const OS_LEVELS = [
     concepts: [
       'FCFS (First-Come, First-Served): Non-preemptive. Suffers from Convoy Effect when a long burst job blocks fast jobs.',
       'SJF (Shortest Job First): Provably optimal for minimizing Average Waiting Time. Can cause starvation for long processes.',
-      'Round Robin (RR): Preemptive with Time Quantum (Q). Fair share of CPU, ideal for time-sharing systems. Quantum must balance context switch overhead vs responsiveness.',
+      'Round Robin (RR): Preemptive with Time Quantum (Q). Fair share of CPU, ideal for time-sharing systems.',
       'Turnaround Time (TAT) = Completion Time - Arrival Time. Waiting Time (WT) = TAT - Burst Time.'
     ],
     render: (container, onComplete) => renderLevel2(container, onComplete)
@@ -45,7 +45,7 @@ const OS_LEVELS = [
       'Race Condition: Multiple threads access and manipulate shared data concurrently; final result depends on execution order.',
       'Critical Section: Code segment accessing shared resources that must be executed by at most one thread at a time.',
       'Mutual Exclusion (Mutex): Binary lock ensuring only one thread enters the Critical Section (lock() -> write -> unlock()).',
-      'Semaphores: Integer variables modified only via atomic wait() (P) and signal() (V) operations. Counting semaphores manage finite resource pools.'
+      'Semaphores: Integer variables modified only via atomic wait() (P) and signal() (V) operations.'
     ],
     render: (container, onComplete) => renderLevel3(container, onComplete)
   },
@@ -73,7 +73,7 @@ const OS_LEVELS = [
     story: 'The Palace courtyard floor is divided into memory partitions ready for colorful Diwali Rangoli stencils of various sizes (KB). Practice First Fit, Best Fit, and Worst Fit allocation strategies. Witness External Fragmentation when scattered free spaces cannot hold a large Peacock Rangoli, and execute Royal Memory Compaction!',
     concepts: [
       'Contiguous Allocation: Memory allocated in contiguous linear blocks. Easy translation via Base & Limit registers.',
-      'First Fit: Allocates first hole big enough (fastest). Best Fit: Allocates smallest hole that fits (minimizes wasted block, but creates tiny leftover slivers). Worst Fit: Leaves largest remaining hole.',
+      'First Fit: Allocates first hole big enough (fastest). Best Fit: Allocates smallest hole that fits. Worst Fit: Leaves largest remaining hole.',
       'Internal Fragmentation: Allocated memory block is larger than requested memory; unused space trapped inside.',
       'External Fragmentation: Total free memory is sufficient to satisfy request, but memory is non-contiguous. Solved by Compaction or Paging.'
     ],
@@ -102,20 +102,65 @@ const OS_LEVELS = [
     diyaName: 'Saptama Diya of File Systems',
     story: 'The Emperor’s Golden Kaju Katli Box is locked inside the Royal Vault! The vault storage is organized as an Inode file system with Direct, Single Indirect, and Double Indirect block pointers. Inspect the Inode structure, trace pointer chains to extract the golden sweet, and evaluate file allocation methods to light the final 7th Sacred Diya!',
     concepts: [
-      'Inode (Index Node): Data structure storing file metadata (type, size, owner, permissions, timestamps) and block pointers to physical disk sectors.',
+      'Inode (Index Node): Data structure storing file metadata and block pointers to physical disk sectors.',
       'Direct Pointers: Array of direct block addresses for fast immediate access to small files.',
-      'Indirect Pointers: Single indirect pointer points to a block of pointers; double indirect points to a block of single indirect blocks, allowing files to scale to terabytes.',
-      'Allocation Methods: Contiguous (fast sequential, prone to fragmentation), Linked List (scattered blocks, sequential traversal only, pointer overhead), Indexed (Inodes - fast random access, no external fragmentation).'
+      'Indirect Pointers: Single indirect pointer points to a block of pointers; double indirect points to a block of single indirect blocks.',
+      'Allocation Methods: Contiguous (fast sequential, prone to fragmentation), Linked List (scattered blocks, sequential traversal only), Indexed (Inodes - fast random access).'
     ],
     render: (container, onComplete) => renderLevel7(container, onComplete)
   }
 ];
 
+/**
+ * Helper to render the Royal OS Guru Guidance box after 2 failures
+ */
+function renderGuruGuidance(container, { title, explanation, onAutoComplete }) {
+  let guidanceBox = container.querySelector('.guru-guidance-box');
+  if (!guidanceBox) {
+    guidanceBox = document.createElement('div');
+    guidanceBox.className = 'guru-guidance-box';
+    const footer = container.querySelector('.action-footer');
+    if (footer && footer.parentElement) {
+      footer.parentElement.insertBefore(guidanceBox, footer);
+    } else {
+      container.appendChild(guidanceBox);
+    }
+  }
+
+  guidanceBox.innerHTML = `
+    <div class="guru-header">
+      <span class="guru-icon">🪔</span>
+      <div>
+        <h4>Royal OS Guru Guidance Activated</h4>
+        <p class="guru-sub">You have attempted this challenge 2 times. Here is divine conceptual guidance to master this realm!</p>
+      </div>
+    </div>
+    <div class="guru-body">
+      <h5>${title}</h5>
+      <p>${explanation}</p>
+      <div class="guru-actions">
+        <button class="btn btn-warning btn-auto-solve" id="btn-guru-solve">
+          ✨ Auto-Complete Level with Guru Guidance & Light Diya 🪔
+        </button>
+      </div>
+    </div>
+  `;
+
+  guidanceBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const solveBtn = guidanceBox.querySelector('#btn-guru-solve');
+  solveBtn.addEventListener('click', () => {
+    soundEngine.playSuccess();
+    soundEngine.playDiyaLight();
+    onAutoComplete();
+  });
+}
+
 // ==========================================
 // LEVEL 1: PROCESSES VS THREADS
 // ==========================================
 function renderLevel1(container, onComplete) {
-  let score = 0;
+  let failCount = 0;
+
   container.innerHTML = `
     <div class="level-card">
       <div class="level-header">
@@ -178,29 +223,27 @@ function renderLevel1(container, onComplete) {
       </div>
 
       <div class="action-footer">
+        <span class="fail-tracker" id="l1-fail-tracker"></span>
         <button class="btn btn-primary" id="btn-verify-l1">Verify Kitchen Setup & Light Pratham Diya 🪔</button>
       </div>
     </div>
   `;
 
-  // Item placement interaction (Click to toggle or assign)
   let activeSelectedChip = null;
   const chips = container.querySelectorAll('.tray-chip');
   const zoneProcess = container.querySelector('#zone-process');
   const zoneThread = container.querySelector('#zone-thread');
   const tray = container.querySelector('#item-tray');
+  const failTracker = container.querySelector('#l1-fail-tracker');
 
   chips.forEach(chip => {
     chip.addEventListener('click', () => {
       soundEngine.playClick();
-      // If in tray, ask where or move to process/thread
       if (chip.parentElement === tray) {
-        // Toggle selection
         chips.forEach(c => c.classList.remove('selected'));
         chip.classList.add('selected');
         activeSelectedChip = chip;
       } else {
-        // Move back to tray
         tray.appendChild(chip);
         chip.classList.remove('selected');
         activeSelectedChip = null;
@@ -226,19 +269,32 @@ function renderLevel1(container, onComplete) {
 
   container.querySelector('#btn-corrupt-thread').addEventListener('click', () => {
     soundEngine.playError();
-    tStatus.innerHTML = '<span style="color:#ff4d4d;">💥 FATAL: Helper 2 corrupted shared Ghee Bowl! SIGSEGV: Entire Kitchen Process CRASHED! Helper 1 also died!</span>';
+    tStatus.innerHTML = '<span style="color:#ff4d4d;">💥 FATAL: Helper 2 corrupted shared Ghee Bowl! SIGSEGV: Entire Kitchen Process CRASHED!</span>';
     expBox.style.display = 'block';
-    expBox.innerHTML = `<strong>OS Insight:</strong> Because threads share the exact same address space and heap, an illegal memory write or unhandled exception in any single thread brings down the <em>entire host process</em>.`;
+    expBox.innerHTML = `<strong>OS Insight:</strong> Threads share the exact same address space and heap. An illegal memory write in any thread crashes the host process!`;
   });
 
   container.querySelector('#btn-corrupt-process').addEventListener('click', () => {
     soundEngine.playBell(750);
     pStatus.innerHTML = '<span>Bhavan 1: 🟢 Producing Kaju Katli (Unharmed!)</span> | <span style="color:#ff9999;">Bhavan 2: 🔴 Crashed (Isolated)</span>';
     expBox.style.display = 'block';
-    expBox.innerHTML = `<strong>OS Insight:</strong> Processes have strictly separated virtual address spaces protected by hardware MMU / page tables. Bhavan 2 crashing does <em>not</em> affect Bhavan 1!`;
+    expBox.innerHTML = `<strong>OS Insight:</strong> Processes have strictly separated virtual address spaces protected by hardware MMU. Bhavan 2 crashing does not affect Bhavan 1!`;
   });
 
-  // Verification
+  function autoCompleteLevel1() {
+    chips.forEach(c => {
+      c.classList.remove('wrong', 'selected');
+      c.classList.add('correct');
+      if (c.dataset.correct === 'process') {
+        zoneProcess.appendChild(c);
+      } else {
+        zoneThread.appendChild(c);
+      }
+    });
+    container.querySelector('#btn-verify-l1').disabled = true;
+    onComplete(100);
+  }
+
   container.querySelector('#btn-verify-l1').addEventListener('click', () => {
     let correctCount = 0;
     const procChildren = zoneProcess.querySelectorAll('.tray-chip');
@@ -247,18 +303,22 @@ function renderLevel1(container, onComplete) {
     procChildren.forEach(c => {
       if (c.dataset.correct === 'process') {
         c.classList.add('correct');
+        c.classList.remove('wrong');
         correctCount++;
       } else {
         c.classList.add('wrong');
+        c.classList.remove('correct');
       }
     });
 
     threadChildren.forEach(c => {
       if (c.dataset.correct === 'thread') {
         c.classList.add('correct');
+        c.classList.remove('wrong');
         correctCount++;
       } else {
         c.classList.add('wrong');
+        c.classList.remove('correct');
       }
     });
 
@@ -267,22 +327,52 @@ function renderLevel1(container, onComplete) {
       soundEngine.playDiyaLight();
       onComplete(100);
     } else {
+      failCount++;
       soundEngine.playError();
-      alert(`You correctly placed ${correctCount}/6 attributes! Remember:\n- Process = Isolated Address Space, Crash Isolation, IPC\n- Thread = Shared Heap, Fast Context Switch, Private Stack/PC only.\nTry moving the red items!`);
+      failTracker.innerHTML = `Attempts Failed: <strong>${failCount}/2</strong>`;
+
+      if (failCount >= 2) {
+        renderGuruGuidance(container, {
+          title: 'Understanding Processes vs Threads in Architecture',
+          explanation: `
+            <strong>1. Process (Isolated Mithai Bhavan):</strong>
+            <ul>
+              <li>Has separate virtual address space and page tables.</li>
+              <li>Provides Crash Isolation (a crash in one process cannot corrupt another).</li>
+              <li>Must communicate through explicit Inter-Process Communication (IPC: pipes, sockets, message queues).</li>
+            </ul>
+            <strong>2. Thread (Kitchen Helpers in Same Kitchen):</strong>
+            <ul>
+              <li>Shares Heap, Code, and Global Variables within the same address space.</li>
+              <li>Has its own private Program Counter, Stack, and CPU Registers only.</li>
+              <li>Fast context switching because memory mapping and TLB remain warm.</li>
+            </ul>
+          `,
+          onAutoComplete: autoCompleteLevel1
+        });
+      } else {
+        alert(`You placed ${correctCount}/6 attributes correctly. Review your placements and try again!`);
+      }
     }
   });
+
+  // Expose for automated testing
+  container._triggerFail = () => {
+    container.querySelector('#btn-verify-l1').click();
+  };
+  container._autoComplete = autoCompleteLevel1;
 }
 
 // ==========================================
 // LEVEL 2: CPU SCHEDULING & GANTT CHARTS
 // ==========================================
 function renderLevel2(container, onComplete) {
-  // 4 Rockets with Arrival Time and Burst Time
+  let failCount = 0;
   const rockets = [
-    { id: 'P1', name: 'Chakri Multi-Burst', arrival: 0, burst: 6, color: '#FF5722' },
-    { id: 'P2', name: 'Anaar Fountain', arrival: 1, burst: 3, color: '#4CAF50' },
-    { id: 'P3', name: 'Lakshmi VIP Rocket', arrival: 2, burst: 8, color: '#E91E63' },
-    { id: 'P4', name: 'Phuljhadi Sparkler', arrival: 3, burst: 2, color: '#FFC107' }
+    { id: 'P1', name: 'Chakri Multi-Burst', arrival: 0, burst: 6, color: '#D4AF37' },
+    { id: 'P2', name: 'Anaar Fountain', arrival: 1, burst: 3, color: '#FFD700' },
+    { id: 'P3', name: 'Lakshmi VIP Rocket', arrival: 2, burst: 8, color: '#C5A059' },
+    { id: 'P4', name: 'Phuljhadi Sparkler', arrival: 3, burst: 2, color: '#E5C158' }
   ];
 
   container.innerHTML = `
@@ -299,7 +389,7 @@ function renderLevel2(container, onComplete) {
         <h4>🎆 Ready Queue (Fireworks Awaiting Launch):</h4>
         <div class="rocket-cards">
           ${rockets.map(r => `
-            <div class="rocket-card" style="border-top: 4px solid ${r.color}">
+            <div class="rocket-card" style="border-top: 3px solid ${r.color}">
               <div class="r-name"><strong>${r.id}</strong>: ${r.name}</div>
               <div class="r-stats">Arrival (AT): <strong>${r.arrival}s</strong> | Burst (BT): <strong>${r.burst}s</strong></div>
             </div>
@@ -328,7 +418,7 @@ function renderLevel2(container, onComplete) {
         <h4>🎯 Astrologer's Calculation Challenge:</h4>
         <p>Which scheduling algorithm yielded the <strong>minimum Average Waiting Time ($W_{avg}$)</strong> for the fireworks, eliminating the Convoy Effect?</p>
         <div class="quiz-options">
-          <button class="quiz-btn" data-ans="fcfs">FCFS (Due to sequential arrival)</button>
+          <button class="quiz-btn" data-ans="fcfs">FCFS (Due to sequential arrival order)</button>
           <button class="quiz-btn" data-ans="sjf">SJF (Provably optimal for minimizing Average Waiting Time)</button>
           <button class="quiz-btn" data-ans="rr">Round Robin with large Quantum</button>
         </div>
@@ -336,6 +426,7 @@ function renderLevel2(container, onComplete) {
       </div>
 
       <div class="action-footer">
+        <span class="fail-tracker" id="l2-fail-tracker"></span>
         <button class="btn btn-primary" id="btn-verify-l2" disabled>Light Dvitiya Diya of Scheduling 🪔</button>
       </div>
     </div>
@@ -348,75 +439,49 @@ function renderLevel2(container, onComplete) {
   const ganttTimeline = container.querySelector('#gantt-timeline');
   const metricsDisplay = container.querySelector('#metrics-display');
   const verifyBtn = container.querySelector('#btn-verify-l2');
+  const failTracker = container.querySelector('#l2-fail-tracker');
 
   function computeAndRender(algo) {
     currentAlgo = algo;
     soundEngine.playFirecracker();
     
-    let schedule = []; // { id, start, end, color }
+    let schedule = [];
     let waitingTimes = {};
     let turnaroundTimes = {};
 
     if (algo === 'fcfs') {
-      // P1: 0-6, P2: 6-9, P3: 9-17, P4: 17-19
       schedule = [
-        { id: 'P1', start: 0, end: 6, color: '#FF5722' },
-        { id: 'P2', start: 6, end: 9, color: '#4CAF50' },
-        { id: 'P3', start: 9, end: 17, color: '#E91E63' },
-        { id: 'P4', start: 17, end: 19, color: '#FFC107' }
+        { id: 'P1', start: 0, end: 6, color: '#D4AF37' },
+        { id: 'P2', start: 6, end: 9, color: '#FFD700' },
+        { id: 'P3', start: 9, end: 17, color: '#C5A059' },
+        { id: 'P4', start: 17, end: 19, color: '#E5C158' }
       ];
-      // P1: TAT = 6-0=6, WT = 0
-      // P2: TAT = 9-1=8, WT = 8-3=5
-      // P3: TAT = 17-2=15, WT = 15-8=7
-      // P4: TAT = 19-3=16, WT = 16-2=14
       waitingTimes = { P1: 0, P2: 5, P3: 7, P4: 14 };
       turnaroundTimes = { P1: 6, P2: 8, P3: 15, P4: 16 };
     } else if (algo === 'sjf') {
-      // Non-preemptive SJF: At t=0 only P1 is available.
-      // P1 runs 0-6. At t=6, P2(3), P3(8), P4(2) have arrived.
-      // Shortest is P4(2) -> 6 to 8.
-      // Next is P2(3) -> 8 to 11.
-      // Next is P3(8) -> 11 to 19.
       schedule = [
-        { id: 'P1', start: 0, end: 6, color: '#FF5722' },
-        { id: 'P4', start: 6, end: 8, color: '#FFC107' },
-        { id: 'P2', start: 8, end: 11, color: '#4CAF50' },
-        { id: 'P3', start: 11, end: 19, color: '#E91E63' }
+        { id: 'P1', start: 0, end: 6, color: '#D4AF37' },
+        { id: 'P4', start: 6, end: 8, color: '#E5C158' },
+        { id: 'P2', start: 8, end: 11, color: '#FFD700' },
+        { id: 'P3', start: 11, end: 19, color: '#C5A059' }
       ];
-      // P1: Comp=6, TAT=6-0=6, WT=6-6=0
-      // P4: Comp=8, TAT=8-3=5, WT=5-2=3
-      // P2: Comp=11, TAT=11-1=10, WT=10-3=7
-      // P3: Comp=19, TAT=19-2=17, WT=17-8=9
       waitingTimes = { P1: 0, P2: 7, P3: 9, P4: 3 };
       turnaroundTimes = { P1: 6, P2: 10, P3: 17, P4: 5 };
     } else if (algo === 'rr') {
-      // Quantum = 2.
-      // t=0: P1 runs [0, 2], rem 4. Arrivals P2(1). Queue: P2, P1
-      // t=2: P2 runs [2, 4], rem 1. Arrivals P3(2), P4(3). Queue: P1, P3, P4, P2
-      // t=4: P1 runs [4, 6], rem 2. Queue: P3, P4, P2, P1
-      // t=6: P3 runs [6, 8], rem 6. Queue: P4, P2, P1, P3
-      // t=8: P4 runs [8, 10], rem 0 (DONE!). Queue: P2, P1, P3
-      // t=10: P2 runs [10, 11], rem 0 (DONE!). Queue: P1, P3
-      // t=11: P1 runs [11, 13], rem 0 (DONE!). Queue: P3
-      // t=13: P3 runs [13, 19], rem 0 (DONE!).
       schedule = [
-        { id: 'P1', start: 0, end: 2, color: '#FF5722' },
-        { id: 'P2', start: 2, end: 4, color: '#4CAF50' },
-        { id: 'P1', start: 4, end: 6, color: '#FF5722' },
-        { id: 'P3', start: 6, end: 8, color: '#E91E63' },
-        { id: 'P4', start: 8, end: 10, color: '#FFC107' },
-        { id: 'P2', start: 10, end: 11, color: '#4CAF50' },
-        { id: 'P1', start: 11, end: 13, color: '#FF5722' },
-        { id: 'P3', start: 13, end: 19, color: '#E91E63' }
+        { id: 'P1', start: 0, end: 2, color: '#D4AF37' },
+        { id: 'P2', start: 2, end: 4, color: '#FFD700' },
+        { id: 'P1', start: 4, end: 6, color: '#D4AF37' },
+        { id: 'P3', start: 6, end: 8, color: '#C5A059' },
+        { id: 'P4', start: 8, end: 10, color: '#E5C158' },
+        { id: 'P2', start: 10, end: 11, color: '#FFD700' },
+        { id: 'P1', start: 11, end: 13, color: '#D4AF37' },
+        { id: 'P3', start: 13, end: 19, color: '#C5A059' }
       ];
-      // Comp times: P4=10, P2=11, P1=13, P3=19
-      // TAT: P1=13-0=13, P2=11-1=10, P3=19-2=17, P4=10-3=7
-      // WT: P1=13-6=7, P2=10-3=7, P3=17-8=9, P4=7-2=5
       waitingTimes = { P1: 7, P2: 7, P3: 9, P4: 5 };
       turnaroundTimes = { P1: 13, P2: 10, P3: 17, P4: 7 };
     }
 
-    // Render Gantt
     const totalTime = 19;
     ganttChart.innerHTML = '';
     ganttTimeline.innerHTML = '';
@@ -432,7 +497,6 @@ function renderLevel2(container, onComplete) {
       ganttChart.appendChild(el);
     });
 
-    // Timeline markers
     const timePoints = [0, ...schedule.map(s => s.end)];
     const uniquePoints = [...new Set(timePoints)].sort((a,b) => a-b);
     uniquePoints.forEach(t => {
@@ -442,7 +506,6 @@ function renderLevel2(container, onComplete) {
       ganttTimeline.appendChild(span);
     });
 
-    // Compute averages
     const avgWT = (Object.values(waitingTimes).reduce((a, b) => a + b, 0) / 4).toFixed(2);
     const avgTAT = (Object.values(turnaroundTimes).reduce((a, b) => a + b, 0) / 4).toFixed(2);
 
@@ -464,7 +527,6 @@ function renderLevel2(container, onComplete) {
     `;
   }
 
-  // Hook algorithm buttons
   const algoBtns = container.querySelectorAll('.algo-selection .btn');
   algoBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -476,10 +538,26 @@ function renderLevel2(container, onComplete) {
     });
   });
 
-  // Initial render
   computeAndRender('fcfs');
 
-  // Quiz click
+  function autoCompleteLevel2() {
+    computeAndRender('sjf');
+    container.querySelectorAll('.algo-selection .btn').forEach(b => b.classList.remove('active'));
+    container.querySelector('#btn-sjf').classList.add('active');
+    
+    quizBtns.forEach(b => b.classList.remove('selected'));
+    const correctBtn = container.querySelector('[data-ans="sjf"]');
+    correctBtn.classList.add('selected');
+    
+    quizFeedback.style.display = 'block';
+    quizFeedback.className = 'info-alert success';
+    quizFeedback.innerHTML = '<strong>Guru Guidance Applied!</strong> SJF scheduling minimizes average waiting time to <strong>4.75s</strong>.';
+    solvedQuiz = true;
+    verifyBtn.removeAttribute('disabled');
+    soundEngine.playRocketLaunch();
+    onComplete(100);
+  }
+
   const quizBtns = container.querySelectorAll('.quiz-btn');
   const quizFeedback = container.querySelector('#quiz-feedback');
   quizBtns.forEach(btn => {
@@ -494,10 +572,28 @@ function renderLevel2(container, onComplete) {
         solvedQuiz = true;
         verifyBtn.removeAttribute('disabled');
       } else {
+        failCount++;
         soundEngine.playError();
         quizFeedback.style.display = 'block';
         quizFeedback.className = 'info-alert';
-        quizFeedback.innerHTML = 'Not quite! Inspect the metrics above when switching between tabs. Compare the Average Waiting Time of SJF (4.75s) vs FCFS (6.5s).';
+        quizFeedback.innerHTML = 'Not quite! Inspect the metrics above when switching between algorithms.';
+        failTracker.innerHTML = `Attempts Failed: <strong>${failCount}/2</strong>`;
+
+        if (failCount >= 2) {
+          renderGuruGuidance(container, {
+            title: 'Mathematical Optimality of Shortest Job First (SJF)',
+            explanation: `
+              <strong>Why SJF gives the lowest Average Waiting Time:</strong>
+              <ul>
+                <li>When shorter jobs execute first, their brief burst times mean other waiting jobs accumulate waiting time at the slowest possible rate.</li>
+                <li>In this level: FCFS Average Waiting Time = <strong>6.50s</strong> (Convoy Effect from P1).</li>
+                <li>Round Robin ($Q=2$) Average Waiting Time = <strong>7.00s</strong>.</li>
+                <li>SJF Average Waiting Time = <strong>4.75s</strong> (Mathematically Optimal).</li>
+              </ul>
+            `,
+            onAutoComplete: autoCompleteLevel2
+          });
+        }
       }
     });
   });
@@ -508,12 +604,20 @@ function renderLevel2(container, onComplete) {
       onComplete(100);
     }
   });
+
+  // Automated test hooks
+  container._triggerFail = () => {
+    container.querySelector('[data-ans="fcfs"]').click();
+  };
+  container._autoComplete = autoCompleteLevel2;
 }
 
 // ==========================================
 // LEVEL 3: SYNCHRONIZATION & MUTEX
 // ==========================================
 function renderLevel3(container, onComplete) {
+  let failCount = 0;
+
   container.innerHTML = `
     <div class="level-card">
       <div class="level-header">
@@ -588,9 +692,13 @@ function renderLevel3(container, onComplete) {
           <button class="chip" data-code="wait_mutex"><code>sem_wait(&mutex); // Entry Section (P)</code></button>
           <button class="chip" data-code="signal_mutex"><code>sem_post(&mutex); // Exit Section (V)</code></button>
         </div>
+        <div style="margin-top: 10px;">
+          <button class="btn btn-secondary btn-sm" id="btn-check-sync-code">Verify Sequence</button>
+        </div>
       </div>
 
       <div class="action-footer">
+        <span class="fail-tracker" id="l3-fail-tracker"></span>
         <button class="btn btn-primary" id="btn-verify-l3" disabled>Light Tritiya Diya of Synchronization 🪔</button>
       </div>
     </div>
@@ -603,6 +711,7 @@ function renderLevel3(container, onComplete) {
   const syncLog = container.querySelector('#sync-log');
   const verifyBtn = container.querySelector('#btn-verify-l3');
   const flameVisual = container.querySelector('#akhand-flame');
+  const failTracker = container.querySelector('#l3-fail-tracker');
 
   btnRun.addEventListener('click', () => {
     soundEngine.playFirecracker();
@@ -612,10 +721,9 @@ function renderLevel3(container, onComplete) {
     syncLog.innerHTML = `<p class="log-entry">Starting concurrent pours with Mutex = <strong>${useMutex ? 'ENABLED (Safe)' : 'DISABLED (Unprotected)'}</strong>...</p>`;
 
     let sharedUrn = 0;
-    const expected = 300; // 3 priests * 100
+    const expected = 300;
 
     if (useMutex) {
-      // Perfectly serialized
       sharedUrn = expected;
       setTimeout(() => {
         gheeVal.innerText = sharedUrn;
@@ -623,15 +731,13 @@ function renderLevel3(container, onComplete) {
         flameVisual.classList.add('radiant');
         soundEngine.playSuccess();
         syncLog.innerHTML = `
-          <p class="log-entry" style="color:#00ff88;">✅ Mutex Lock Protected Critical Section!</p>
+          <p class="log-entry" style="color:#D4AF37;">✅ Mutex Lock Protected Critical Section!</p>
           <p class="log-entry">Expected: 300 ml | Actual: 300 ml. Zero race conditions! Each priest acquired lock before updating shared variable.</p>
         `;
         btnRun.disabled = false;
-      }, 600);
+      }, 500);
     } else {
-      // Race condition! Lost updates
-      // Multiple threads read same old value, increment, and overwrite
-      sharedUrn = 184; // Simulated race condition loss
+      sharedUrn = 184;
       setTimeout(() => {
         soundEngine.playError();
         gheeVal.innerText = sharedUrn;
@@ -640,17 +746,16 @@ function renderLevel3(container, onComplete) {
         syncLog.innerHTML = `
           <p class="log-entry" style="color:#ff4444;">❌ RACE CONDITION OCCURRED!</p>
           <p class="log-entry">Expected: 300 ml | Actual: <strong>${sharedUrn} ml</strong> (Lost 116 ml of sacred ghee!).</p>
-          <p class="log-entry">Because threads preempted each other midway during (Read -> Modify -> Write), updates were overwritten!</p>
+          <p class="log-entry">Threads preempted each other midway during (Read -> Modify -> Write), overwriting updates!</p>
         `;
         btnRun.disabled = false;
-      }, 600);
+      }, 500);
     }
   });
 
-  // Code slot drag/click interaction
   let activeCodeChip = null;
-  const chips = container.querySelectorAll('.code-chips .chip');
-  const slots = container.querySelectorAll('.code-slots .code-slot');
+  const chips = container.querySelectorAll('.chip');
+  const slots = container.querySelectorAll('.code-slot');
 
   chips.forEach(chip => {
     chip.addEventListener('click', () => {
@@ -669,7 +774,6 @@ function renderLevel3(container, onComplete) {
         slot.appendChild(activeCodeChip);
         activeCodeChip.classList.remove('selected');
         activeCodeChip = null;
-        checkCodeAssembly();
       }
     });
   });
@@ -687,19 +791,76 @@ function renderLevel3(container, onComplete) {
       soundEngine.playBell(880);
       slots.forEach(s => s.classList.add('correct'));
       verifyBtn.removeAttribute('disabled');
+      return true;
     }
+    return false;
   }
+
+  function autoCompleteLevel3() {
+    chkMutex.checked = true;
+    btnRun.click();
+
+    // Auto-place chips into slots in correct order
+    const expectedOrder = ['wait_mutex', 'critical_section', 'signal_mutex'];
+    slots.forEach((slot, idx) => {
+      const code = expectedOrder[idx];
+      const chip = container.querySelector(`.chip[data-code="${code}"]`);
+      if (chip) {
+        slot.innerHTML = '';
+        slot.appendChild(chip);
+        slot.classList.add('correct');
+      }
+    });
+
+    verifyBtn.removeAttribute('disabled');
+    soundEngine.playDiyaLight();
+    onComplete(100);
+  }
+
+  container.querySelector('#btn-check-sync-code').addEventListener('click', () => {
+    const ok = checkCodeAssembly();
+    if (!ok) {
+      failCount++;
+      soundEngine.playError();
+      failTracker.innerHTML = `Attempts Failed: <strong>${failCount}/2</strong>`;
+
+      if (failCount >= 2) {
+        renderGuruGuidance(container, {
+          title: 'The Anatomy of a Critical Section',
+          explanation: `
+            <strong>Proper Synchronization Protocol:</strong>
+            <ol>
+              <li><strong>Entry Section:</strong> <code>sem_wait(&mutex)</code> or <code>pthread_mutex_lock()</code> ensures mutual exclusion. If another thread is in the critical section, this thread waits.</li>
+              <li><strong>Critical Section:</strong> <code>urn_ghee += 10</code>. Modifies shared resource safely while holding the lock.</li>
+              <li><strong>Exit Section:</strong> <code>sem_post(&mutex)</code> or <code>pthread_mutex_unlock()</code> releases the lock so the next waiting thread can enter.</li>
+            </ol>
+          `,
+          onAutoComplete: autoCompleteLevel3
+        });
+      } else {
+        alert('Sequence is incorrect! Ensure Entry Section comes before Critical Section, and Exit Section comes after.');
+      }
+    }
+  });
 
   verifyBtn.addEventListener('click', () => {
     soundEngine.playDiyaLight();
     onComplete(100);
   });
+
+  // Automated test hooks
+  container._triggerFail = () => {
+    container.querySelector('#btn-check-sync-code').click();
+  };
+  container._autoComplete = autoCompleteLevel3;
 }
 
 // ==========================================
 // LEVEL 4: DEADLOCKS & BANKER'S ALGORITHM
 // ==========================================
 function renderLevel4(container, onComplete) {
+  let failCount = 0;
+
   container.innerHTML = `
     <div class="level-card">
       <div class="level-header">
@@ -786,6 +947,7 @@ function renderLevel4(container, onComplete) {
       </div>
 
       <div class="action-footer">
+        <span class="fail-tracker" id="l4-fail-tracker"></span>
         <button class="btn btn-primary" id="btn-verify-l4" disabled>Light Chaturtha Diya of Deadlock Freedom 🪔</button>
       </div>
     </div>
@@ -794,9 +956,60 @@ function renderLevel4(container, onComplete) {
   let part1Solved = false;
   let part2Solved = false;
   const verifyBtn = container.querySelector('#btn-verify-l4');
+  const failTracker = container.querySelector('#l4-fail-tracker');
+
+  function autoCompleteLevel4() {
+    part1Solved = true;
+    part2Solved = true;
+    
+    // Select correct part 1
+    const p1Btn = container.querySelector('[data-break="preempt"]');
+    ragBtns.forEach(b => b.classList.remove('selected'));
+    p1Btn.classList.add('selected');
+    ragFeedback.style.display = 'block';
+    ragFeedback.className = 'info-alert success';
+    ragFeedback.innerHTML = '<strong>Guru Guidance:</strong> Resource preemption or linear ordering breaks the circular wait!';
+
+    // Select correct part 2
+    const p2Btn = container.querySelector('[data-seq="p3_first"]');
+    seqBtns.forEach(b => b.classList.remove('selected'));
+    p2Btn.classList.add('selected');
+    bankerFeedback.style.display = 'block';
+    bankerFeedback.className = 'info-alert success';
+    bankerFeedback.innerHTML = '<strong>Guru Guidance:</strong> Safe Sequence &lt;P3, P1, P0, P2&gt; satisfies Banker Safety Criteria!';
+
+    verifyBtn.removeAttribute('disabled');
+    soundEngine.playSuccess();
+    onComplete(100);
+  }
+
+  function registerFailure() {
+    failCount++;
+    soundEngine.playError();
+    failTracker.innerHTML = `Attempts Failed: <strong>${failCount}/2</strong>`;
+
+    if (failCount >= 2) {
+      renderGuruGuidance(container, {
+        title: 'Coffman Conditions & Banker’s Safety Verification',
+        explanation: `
+          <strong>1. Deadlock Prevention:</strong>
+          Deadlock requires all 4 Coffman conditions simultaneously: <em>Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait</em>.
+          Enforcing a strict hierarchical resource ordering ($R_1 < R_2 < R_3$) completely eliminates circular wait!
+          <br><br>
+          <strong>2. Banker's Algorithm Safe Sequence:</strong>
+          Current Available = <strong>[3, 3, 2]</strong>.<br>
+          - P3 Need is [0, 1, 1] &le; [3, 3, 2] &rarr; P3 executes & releases [2, 1, 1], New Available = [5, 4, 3].<br>
+          - P1 Need is [1, 2, 2] &le; [5, 4, 3] &rarr; P1 executes & releases [2, 0, 0], New Available = [7, 4, 3].<br>
+          - P0 Need is [7, 4, 3] &le; [7, 4, 3] &rarr; P0 executes & releases [0, 1, 0], New Available = [7, 5, 3].<br>
+          - P2 Need is [6, 0, 0] &le; [7, 5, 3] &rarr; P2 finishes! Safe Sequence = <strong>&lt;P3, P1, P0, P2&gt;</strong>.
+        `,
+        onAutoComplete: autoCompleteLevel4
+      });
+    }
+  }
 
   // Part 1
-  const ragBtns = container.querySelectorAll('.break-actions .quiz-btn');
+  const ragBtns = container.querySelectorAll('.quiz-btn[data-break]');
   const ragFeedback = container.querySelector('#rag-feedback');
   ragBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -806,14 +1019,11 @@ function renderLevel4(container, onComplete) {
         btn.classList.add('selected');
         ragFeedback.style.display = 'block';
         ragFeedback.className = 'info-alert success';
-        ragFeedback.innerHTML = '<strong>Splendid!</strong> Preempting resources or enforcing strict resource ordering (e.g., must request Matchbox < Candle < Lighter) breaks the <strong>Circular Wait</strong> condition, preventing deadlock!';
+        ragFeedback.innerHTML = '<strong>Splendid!</strong> Preempting resources or enforcing strict resource ordering breaks the <strong>Circular Wait</strong> condition!';
         part1Solved = true;
         checkCompletion();
       } else {
-        soundEngine.playError();
-        ragFeedback.style.display = 'block';
-        ragFeedback.className = 'info-alert';
-        ragFeedback.innerHTML = 'Holding and waiting or adding resources without ordering exacerbates deadlock. You must eliminate one of Coffman’s 4 conditions!';
+        registerFailure();
       }
     });
   });
@@ -825,23 +1035,15 @@ function renderLevel4(container, onComplete) {
     btn.addEventListener('click', () => {
       if (btn.dataset.seq === 'p3_first') {
         soundEngine.playSuccess();
-        soundEngine.playFirecracker();
         seqBtns.forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         bankerFeedback.style.display = 'block';
         bankerFeedback.className = 'info-alert success';
-        bankerFeedback.innerHTML = `<strong>Safe State Confirmed!</strong><br>
-        1. P3 Need [0,1,1] ≤ Available [3,3,2] ➔ P3 finishes & releases [2,1,1] ➔ New Available = [5,4,3]<br>
-        2. P1 Need [1,2,2] ≤ [5,4,3] ➔ P1 finishes & releases [2,0,0] ➔ New Available = [7,4,3]<br>
-        3. P0 Need [7,4,3] ≤ [7,4,3] ➔ P0 finishes & releases [0,1,0] ➔ New Available = [7,5,3]<br>
-        4. P2 finishes! Complete safe sequence: <strong>&lt;P3, P1, P0, P2&gt;</strong>`;
+        bankerFeedback.innerHTML = '<strong>Safe State Confirmed!</strong> Complete safe sequence: <strong>&lt;P3, P1, P0, P2&gt;</strong>.';
         part2Solved = true;
         checkCompletion();
       } else {
-        soundEngine.playError();
-        bankerFeedback.style.display = 'block';
-        bankerFeedback.className = 'info-alert';
-        bankerFeedback.innerHTML = 'That sequence enters an Unsafe State! Check the initial Available vector [3, 3, 2]. P0 needs [7,4,3] and P2 needs [6,0,0], which exceeds initial inventory!';
+        registerFailure();
       }
     });
   });
@@ -856,12 +1058,20 @@ function renderLevel4(container, onComplete) {
     soundEngine.playDiyaLight();
     onComplete(100);
   });
+
+  // Automated test hooks
+  container._triggerFail = () => {
+    container.querySelector('[data-break="wait"]').click();
+  };
+  container._autoComplete = autoCompleteLevel4;
 }
 
 // ==========================================
 // LEVEL 5: MEMORY MANAGEMENT & FRAGMENTATION
 // ==========================================
 function renderLevel5(container, onComplete) {
+  let failCount = 0;
+
   container.innerHTML = `
     <div class="level-card">
       <div class="level-header">
@@ -886,16 +1096,16 @@ function renderLevel5(container, onComplete) {
       <div class="stencils-tray">
         <h4>Festive Rangoli Stencils to Allocate:</h4>
         <div class="stencil-chips">
-          <div class="stencil-card" data-size="212" id="st-1" style="border-left: 5px solid #FF5722;">
+          <div class="stencil-card" data-size="212" id="st-1" style="border-left: 4px solid #FFD700;">
             <strong>🌸 Lotus Rangoli</strong> (212 KB)
           </div>
-          <div class="stencil-card" data-size="417" id="st-2" style="border-left: 5px solid #00BCD4;">
+          <div class="stencil-card" data-size="417" id="st-2" style="border-left: 4px solid #D4AF37;">
             <strong>🦚 Peacock Rangoli</strong> (417 KB)
           </div>
-          <div class="stencil-card" data-size="112" id="st-3" style="border-left: 5px solid #8BC34A;">
+          <div class="stencil-card" data-size="112" id="st-3" style="border-left: 4px solid #C5A059;">
             <strong>🪔 Golden Diya Rangoli</strong> (112 KB)
           </div>
-          <div class="stencil-card" data-size="426" id="st-4" style="border-left: 5px solid #E91E63;">
+          <div class="stencil-card" data-size="426" id="st-4" style="border-left: 4px solid #E5C158;">
             <strong>✨ Mandana Geometric</strong> (426 KB)
           </div>
         </div>
@@ -903,98 +1113,126 @@ function renderLevel5(container, onComplete) {
 
       <div class="algo-controls">
         <button class="btn btn-secondary active" id="btn-first-fit">Apply Best-Fit Allocation</button>
-        <button class="btn btn-secondary" id="btn-reset-mem">Clear Courtyard</button>
+        <button class="btn btn-secondary" id="btn-bad-alloc">Apply Worst-Fit Allocation</button>
         <button class="btn btn-warning" id="btn-compaction" style="display:none;">🧹 Execute Royal Memory Compaction</button>
       </div>
 
       <div class="frag-stats" id="frag-stats">
-        <p>Select an allocation strategy to see how memory holes and fragmentation behave.</p>
+        <p>Select an allocation strategy to observe memory fragmentation.</p>
       </div>
 
       <div class="action-footer">
+        <span class="fail-tracker" id="l5-fail-tracker"></span>
         <button class="btn btn-primary" id="btn-verify-l5" disabled>Light Panchama Diya of Memory 🪔</button>
       </div>
     </div>
   `;
 
   const btnBestFit = container.querySelector('#btn-first-fit');
-  const btnReset = container.querySelector('#btn-reset-mem');
+  const btnBadAlloc = container.querySelector('#btn-bad-alloc');
   const btnCompaction = container.querySelector('#btn-compaction');
   const fragStats = container.querySelector('#frag-stats');
   const verifyBtn = container.querySelector('#btn-verify-l5');
+  const failTracker = container.querySelector('#l5-fail-tracker');
 
-  btnBestFit.addEventListener('click', () => {
+  function applyBestFit() {
     soundEngine.playFirecracker();
-    // Best Fit:
-    // Stencil 1 (212 KB): fits in smallest hole >= 212. Holes: 100(no), 500, 200(no), 300(fits! left=88), 600. Best is 300!
-    // Stencil 2 (417 KB): Holes remaining: 100, 500(left=83), 200, 88, 600. Best is 500!
-    // Stencil 3 (112 KB): Holes remaining: 100(no), 83(no), 200(left=88), 88(no), 600. Best is 200!
-    // Stencil 4 (426 KB): Holes remaining: 100, 83, 88, 88, 600(left=174). Fits in 600!
-    
-    container.querySelector('#slot-0').innerHTML = '<span>Slot 0 (100 KB)</span><small style="color:#ffcc00;">FREE (100 KB)</small>';
-    container.querySelector('#slot-1').innerHTML = '<span>Slot 1</span><small style="color:#00ff88;">🦚 Peacock (417K)<br>Hole: 83K</small>';
-    container.querySelector('#slot-2').innerHTML = '<span>Slot 2</span><small style="color:#00ff88;">🪔 Diya (112K)<br>Hole: 88K</small>';
-    container.querySelector('#slot-3').innerHTML = '<span>Slot 3</span><small style="color:#00ff88;">🌸 Lotus (212K)<br>Hole: 88K</small>';
-    container.querySelector('#slot-4').innerHTML = '<span>Slot 4</span><small style="color:#00ff88;">✨ Mandana (426K)<br>Hole: 174K</small>';
+    container.querySelector('#slot-0').innerHTML = '<span>Slot 0 (100 KB)</span><small style="color:#D4AF37;">FREE (100 KB)</small>';
+    container.querySelector('#slot-1').innerHTML = '<span>Slot 1</span><small style="color:#D4AF37;">🦚 Peacock (417K)<br>Hole: 83K</small>';
+    container.querySelector('#slot-2').innerHTML = '<span>Slot 2</span><small style="color:#D4AF37;">🪔 Diya (112K)<br>Hole: 88K</small>';
+    container.querySelector('#slot-3').innerHTML = '<span>Slot 3</span><small style="color:#D4AF37;">🌸 Lotus (212K)<br>Hole: 88K</small>';
+    container.querySelector('#slot-4').innerHTML = '<span>Slot 4</span><small style="color:#D4AF37;">✨ Mandana (426K)<br>Hole: 174K</small>';
 
     fragStats.innerHTML = `
       <div class="info-alert success">
-        <strong>Best-Fit Executed!</strong> All 4 initial stencils allocated.<br>
-        Remaining scattered free fragments: 100 KB + 83 KB + 88 KB + 88 KB + 174 KB = <strong>533 KB TOTAL FREE MEMORY</strong>.<br>
+        <strong>Best-Fit Executed!</strong> Remaining scattered free fragments: 100 KB + 83 KB + 88 KB + 88 KB + 174 KB = <strong>533 KB TOTAL FREE MEMORY</strong>.<br>
         <em>Now an incoming Royal Maha-Rangoli (300 KB) arrives! But no single contiguous hole can hold 300 KB! This is <strong>External Fragmentation</strong>.</em>
       </div>
     `;
 
     btnCompaction.style.display = 'inline-block';
-  });
+  }
 
-  btnReset.addEventListener('click', () => {
-    soundEngine.playClick();
-    container.querySelectorAll('.mem-slot').forEach(s => {
-      s.className = 'mem-slot free';
-      s.innerHTML = `<span>${s.id} (${s.dataset.size} KB)</span><small class="slot-status">FREE</small>`;
-    });
-    btnCompaction.style.display = 'none';
-    fragStats.innerHTML = '<p>Courtyard cleared.</p>';
-  });
-
-  btnCompaction.addEventListener('click', () => {
+  function applyCompaction() {
     soundEngine.playSuccess();
-    soundEngine.playBell(1046);
-    
-    // Animate compaction
     const pBar = container.querySelector('#partitions-bar');
     pBar.innerHTML = `
-      <div class="mem-slot allocated" style="flex:4; background:#2e7d32;">
+      <div class="mem-slot allocated" style="flex:4; background:#222; border:1px solid #D4AF37;">
         <span>Compacted Allocated Rangolis</span>
-        <small style="color:#fff;">1167 KB Contiguous in RAM</small>
+        <small style="color:#D4AF37;">1167 KB Contiguous in RAM</small>
       </div>
-      <div class="mem-slot free" style="flex:2; background:#ff9800;">
+      <div class="mem-slot free" style="flex:2; background:#111; border:1px solid #FFD700;">
         <span>Unified Free Memory</span>
-        <small style="color:#fff;">533 KB Contiguous Free Space! 🏆</small>
+        <small style="color:#FFD700;">533 KB Contiguous Free Space! 🏆</small>
       </div>
     `;
 
     fragStats.innerHTML = `
       <div class="info-alert success">
-        <strong>Royal Compaction Complete!</strong> Relocated all active processes to one end of memory, merging all free fragments into one unified <strong>533 KB contiguous hole</strong>. The 300 KB Maha-Rangoli can now comfortably fit!
+        <strong>Royal Compaction Complete!</strong> All active processes shifted to one end, creating a unified <strong>533 KB contiguous hole</strong>.
       </div>
     `;
 
     verifyBtn.removeAttribute('disabled');
+  }
+
+  function autoCompleteLevel5() {
+    applyBestFit();
+    applyCompaction();
+    soundEngine.playDiyaLight();
+    onComplete(100);
+  }
+
+  btnBestFit.addEventListener('click', applyBestFit);
+
+  btnBadAlloc.addEventListener('click', () => {
+    failCount++;
+    soundEngine.playError();
+    failTracker.innerHTML = `Attempts Failed: <strong>${failCount}/2</strong>`;
+
+    fragStats.innerHTML = `
+      <div class="info-alert">
+        Worst-Fit leaves holes that fail earlier to accommodate incoming requests. Try Best-Fit!
+      </div>
+    `;
+
+    if (failCount >= 2) {
+      renderGuruGuidance(container, {
+        title: 'Memory Allocation Strategies & Compaction',
+        explanation: `
+          <strong>External Fragmentation Solution:</strong>
+          <ul>
+            <li><strong>Best-Fit:</strong> Allocates the smallest hole that is large enough, minimizing leftover hole size per block.</li>
+            <li><strong>External Fragmentation:</strong> When total free memory (533 KB) is greater than the request (300 KB), but non-contiguous.</li>
+            <li><strong>Compaction (Defragmentation):</strong> Shuffles all allocated partitions to one end of memory, creating one single large contiguous free block.</li>
+          </ul>
+        `,
+        onAutoComplete: autoCompleteLevel5
+      });
+    }
   });
+
+  btnCompaction.addEventListener('click', applyCompaction);
 
   verifyBtn.addEventListener('click', () => {
     soundEngine.playDiyaLight();
     onComplete(100);
   });
+
+  // Automated test hooks
+  container._triggerFail = () => {
+    container.querySelector('#btn-bad-alloc').click();
+  };
+  container._autoComplete = autoCompleteLevel5;
 }
 
 // ==========================================
 // LEVEL 6: PAGING & VIRTUAL MEMORY
 // ==========================================
 function renderLevel6(container, onComplete) {
+  let failCount = 0;
   const referenceString = [7, 0, 1, 2, 0, 3, 0, 4, 2, 3];
+
   container.innerHTML = `
     <div class="level-card">
       <div class="level-header">
@@ -1025,7 +1263,7 @@ function renderLevel6(container, onComplete) {
         <div class="btn-group">
           <button class="btn btn-secondary active" id="btn-step-lru">Step Next Lantern Request (LRU)</button>
           <button class="btn btn-secondary" id="btn-auto-lru">Auto-Simulate All 10 Steps</button>
-          <button class="btn btn-secondary" id="btn-reset-lru">Reset</button>
+          <button class="btn btn-secondary" id="btn-trigger-thrashing">Simulate Thrashing (High Swap)</button>
         </div>
       </div>
 
@@ -1049,6 +1287,7 @@ function renderLevel6(container, onComplete) {
       </div>
 
       <div class="action-footer">
+        <span class="fail-tracker" id="l6-fail-tracker"></span>
         <button class="btn btn-primary" id="btn-verify-l6" disabled>Light Shashta Diya of Virtual Memory 🪔</button>
       </div>
     </div>
@@ -1065,6 +1304,7 @@ function renderLevel6(container, onComplete) {
   const faultRate = container.querySelector('#fault-rate');
   const pagingLog = container.querySelector('#paging-log');
   const verifyBtn = container.querySelector('#btn-verify-l6');
+  const failTracker = container.querySelector('#l6-fail-tracker');
 
   function updateFrameUI() {
     for (let i = 0; i < 3; i++) {
@@ -1087,31 +1327,25 @@ function renderLevel6(container, onComplete) {
     if (currentStep >= referenceString.length) return;
     const page = referenceString[currentStep];
 
-    // Highlight current stream chip
     container.querySelectorAll('.page-num').forEach(c => c.classList.remove('current'));
     const currEl = container.querySelector(`#page-req-${currentStep}`);
     if (currEl) currEl.classList.add('current');
 
-    // Check hit
     const existingIdx = frames.indexOf(page);
     if (existingIdx !== -1) {
-      // HIT!
       hits++;
       lastUsed[existingIdx] = currentStep;
       soundEngine.playBell(920);
-      pagingLog.innerHTML = `<p style="color:#00ff88;">Step ${currentStep + 1}: Requested Page <strong>${page}</strong> ➔ <strong>TLB / PAGE HIT!</strong> Page already present in Frame ${existingIdx}. No disk fetch needed.</p>`;
+      pagingLog.innerHTML = `<p style="color:#D4AF37;">Step ${currentStep + 1}: Requested Page <strong>${page}</strong> ➔ <strong>TLB / PAGE HIT!</strong> Page already present in Frame ${existingIdx}.</p>`;
     } else {
-      // FAULT!
       faults++;
       soundEngine.playFirecracker();
-      // Empty slot?
       const emptyIdx = frames.indexOf(-1);
       if (emptyIdx !== -1) {
         frames[emptyIdx] = page;
         lastUsed[emptyIdx] = currentStep;
-        pagingLog.innerHTML = `<p style="color:#ffcc00;">Step ${currentStep + 1}: Requested Page <strong>${page}</strong> ➔ <strong>PAGE FAULT!</strong> Loaded into empty Frame ${emptyIdx}.</p>`;
+        pagingLog.innerHTML = `<p style="color:#FFD700;">Step ${currentStep + 1}: Requested Page <strong>${page}</strong> ➔ <strong>PAGE FAULT!</strong> Loaded into empty Frame ${emptyIdx}.</p>`;
       } else {
-        // Evict LRU (smallest lastUsed value)
         let lruIdx = 0;
         let minTime = lastUsed[0];
         for (let j = 1; j < 3; j++) {
@@ -1123,7 +1357,7 @@ function renderLevel6(container, onComplete) {
         const victim = frames[lruIdx];
         frames[lruIdx] = page;
         lastUsed[lruIdx] = currentStep;
-        pagingLog.innerHTML = `<p style="color:#ff4d4d;">Step ${currentStep + 1}: Requested Page <strong>${page}</strong> ➔ <strong>PAGE FAULT!</strong> LRU Replacement: Evicted Page ${victim} from Frame ${lruIdx}.</p>`;
+        pagingLog.innerHTML = `<p style="color:#ff6b6b;">Step ${currentStep + 1}: Requested Page <strong>${page}</strong> ➔ <strong>PAGE FAULT!</strong> LRU Replacement: Evicted Page ${victim} from Frame ${lruIdx}.</p>`;
       }
     }
 
@@ -1133,43 +1367,66 @@ function renderLevel6(container, onComplete) {
     if (currentStep >= referenceString.length) {
       soundEngine.playSuccess();
       verifyBtn.removeAttribute('disabled');
-      pagingLog.innerHTML += `<p style="color:#00ffff; font-weight:bold;">All 10 references evaluated! Final Fault Count: ${faults}/10. LRU minimized total faults!</p>`;
+      pagingLog.innerHTML += `<p style="color:#D4AF37; font-weight:bold;">All 10 references evaluated! Final Fault Count: ${faults}/10. LRU minimized total faults!</p>`;
     }
   }
 
-  container.querySelector('#btn-step-lru').addEventListener('click', step);
+  function autoCompleteLevel6() {
+    while (currentStep < referenceString.length) {
+      step();
+    }
+    verifyBtn.removeAttribute('disabled');
+    soundEngine.playDiyaLight();
+    onComplete(100);
+  }
 
+  container.querySelector('#btn-step-lru').addEventListener('click', step);
   container.querySelector('#btn-auto-lru').addEventListener('click', () => {
-    const timer = setInterval(() => {
-      if (currentStep >= referenceString.length) {
-        clearInterval(timer);
-      } else {
-        step();
-      }
-    }, 400);
+    while (currentStep < referenceString.length) {
+      step();
+    }
   });
 
-  container.querySelector('#btn-reset-lru').addEventListener('click', () => {
-    currentStep = 0;
-    frames = [-1, -1, -1];
-    lastUsed = [-1, -1, -1];
-    hits = 0;
-    faults = 0;
-    container.querySelectorAll('.page-num').forEach(c => c.classList.remove('current'));
-    updateFrameUI();
-    pagingLog.innerHTML = '<p>Simulation reset.</p>';
+  container.querySelector('#btn-trigger-thrashing').addEventListener('click', () => {
+    failCount++;
+    soundEngine.playError();
+    failTracker.innerHTML = `Attempts Failed: <strong>${failCount}/2</strong>`;
+    pagingLog.innerHTML = `<p style="color:#ff4444;">💥 SYSTEM THRASHING DETECTED: The CPU is spending more time paging in/out than executing user instructions because working set size exceeds available physical frames!</p>`;
+
+    if (failCount >= 2) {
+      renderGuruGuidance(container, {
+        title: 'Virtual Memory, LRU Page Replacement & Thrashing Prevention',
+        explanation: `
+          <strong>Key Paging Insights:</strong>
+          <ul>
+            <li><strong>Page Table & TLB:</strong> The Translation Lookaside Buffer acts as a high-speed associative hardware cache. A TLB hit avoids accessing main memory twice.</li>
+            <li><strong>Least Recently Used (LRU):</strong> Replaces the page that has not been referenced for the longest period of time (approximates the Optimal algorithm).</li>
+            <li><strong>Thrashing:</strong> Occurs when total working set sizes of processes exceed available physical memory frames. Solved by the Working Set Model or local page replacement policies.</li>
+          </ul>
+        `,
+        onAutoComplete: autoCompleteLevel6
+      });
+    }
   });
 
   verifyBtn.addEventListener('click', () => {
     soundEngine.playDiyaLight();
     onComplete(100);
   });
+
+  // Automated test hooks
+  container._triggerFail = () => {
+    container.querySelector('#btn-trigger-thrashing').click();
+  };
+  container._autoComplete = autoCompleteLevel6;
 }
 
 // ==========================================
 // LEVEL 7: FILE SYSTEMS & INODES
 // ==========================================
 function renderLevel7(container, onComplete) {
+  let failCount = 0;
+
   container.innerHTML = `
     <div class="level-card">
       <div class="level-header">
@@ -1236,6 +1493,7 @@ function renderLevel7(container, onComplete) {
       </div>
 
       <div class="action-footer">
+        <span class="fail-tracker" id="l7-fail-tracker"></span>
         <button class="btn btn-primary" id="btn-verify-l7" disabled>Light Saptama Diya & Attain MahaDiwali Mastery! 👑</button>
       </div>
     </div>
@@ -1245,21 +1503,16 @@ function renderLevel7(container, onComplete) {
   let answeredQuiz = false;
   const verifyBtn = container.querySelector('#btn-verify-l7');
   const fsFeedback = container.querySelector('#fs-feedback');
+  const failTracker = container.querySelector('#l7-fail-tracker');
 
-  // Pointer clicking
   container.querySelectorAll('.btn-ptr').forEach(btn => {
     btn.addEventListener('click', () => {
       soundEngine.playClick();
       const blockId = btn.dataset.block;
       const targetCell = container.querySelector(`#blk-${blockId}`);
-      
       container.querySelectorAll('.disk-cell').forEach(c => c.classList.remove('selected'));
       if (targetCell) {
         targetCell.classList.add('selected');
-        if (blockId === '250') {
-          soundEngine.playBell(700);
-          alert('Opened Index Block 250! It holds pointers to Data Blocks [301, 302]. Tap on Block 302 in the grid to inspect!');
-        }
       }
     });
   });
@@ -1273,23 +1526,53 @@ function renderLevel7(container, onComplete) {
     checkEnd();
   });
 
-  // Quiz
-  container.querySelectorAll('.fs-quiz .quiz-btn').forEach(btn => {
+  function autoCompleteLevel7() {
+    goldenCell.click();
+    const correctBtn = container.querySelector('[data-fs="inode"]');
+    container.querySelectorAll('.quiz-btn[data-fs]').forEach(b => b.classList.remove('selected'));
+    correctBtn.classList.add('selected');
+    fsFeedback.style.display = 'block';
+    fsFeedback.className = 'info-alert success';
+    fsFeedback.innerHTML = '<strong>Guru Guidance:</strong> Inodes permit dynamic scaling without external fragmentation.';
+    answeredQuiz = true;
+    verifyBtn.removeAttribute('disabled');
+    soundEngine.playDiyaLight();
+    onComplete(100);
+  }
+
+  container.querySelectorAll('.quiz-btn[data-fs]').forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.dataset.fs === 'inode') {
         soundEngine.playSuccess();
-        container.querySelectorAll('.fs-quiz .quiz-btn').forEach(b => b.classList.remove('selected'));
+        container.querySelectorAll('.quiz-btn[data-fs]').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         fsFeedback.style.display = 'block';
         fsFeedback.className = 'info-alert success';
-        fsFeedback.innerHTML = '<strong>Outstanding!</strong> Inodes eliminate external fragmentation, allow flexible dynamic file growth, and permit direct random access via indexing without walking lengthy sequential linked chains!';
+        fsFeedback.innerHTML = '<strong>Outstanding!</strong> Inodes eliminate external fragmentation, allow flexible dynamic file growth, and permit direct random access via indexing!';
         answeredQuiz = true;
         checkEnd();
       } else {
+        failCount++;
         soundEngine.playError();
+        failTracker.innerHTML = `Attempts Failed: <strong>${failCount}/2</strong>`;
         fsFeedback.style.display = 'block';
         fsFeedback.className = 'info-alert';
-        fsFeedback.innerHTML = 'Contiguous allocation suffers from external fragmentation and file growth issues. Pure linked allocation requires $O(n)$ slow sequential disk seeks. Inodes combine the best of both!';
+        fsFeedback.innerHTML = 'Contiguous allocation suffers from external fragmentation and file growth issues. Inodes combine the best properties!';
+
+        if (failCount >= 2) {
+          renderGuruGuidance(container, {
+            title: 'Unix Inode Architecture & File Allocation Comparison',
+            explanation: `
+              <strong>Why the Inode Structure is the Gold Standard:</strong>
+              <ul>
+                <li><strong>Direct Pointers:</strong> Fast $O(1)$ random seek for small files (which constitute &gt;80% of files in most operating systems).</li>
+                <li><strong>Indirect Pointers (Single, Double, Triple):</strong> Allows file capacity to scale exponentially to gigabytes/terabytes without pre-allocating contiguous disk regions.</li>
+                <li><strong>No External Fragmentation:</strong> Disk blocks can be scattered across non-contiguous tracks, completely avoiding the limitations of contiguous disk allocation.</li>
+              </ul>
+            `,
+            onAutoComplete: autoCompleteLevel7
+          });
+        }
       }
     });
   });
@@ -1304,4 +1587,10 @@ function renderLevel7(container, onComplete) {
     soundEngine.playSuccess();
     onComplete(100);
   });
+
+  // Automated test hooks
+  container._triggerFail = () => {
+    container.querySelector('[data-fs="contig"]').click();
+  };
+  container._autoComplete = autoCompleteLevel7;
 }
